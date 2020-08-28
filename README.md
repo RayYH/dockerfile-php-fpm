@@ -1,6 +1,6 @@
-# Laravel Application Example
+# Dockerfile for PHP-FPM
 
-## `docker-compose.yml`
+This repo is used for building an image on top of official php:fpm image, with the essential extensions laravel needed. Below was an sample `docker-compose.yml` file for a Laravel-Nginx-Mariadb services suite.
 
 ```yml
 version: "3"
@@ -15,7 +15,7 @@ services:
     ports:
       - 80:80/tcp
     volumes:
-      - the/path/to/nginx/default.d:/etc/nginx/default.d:rw
+      - /the/path/to/nginx/default.d:/etc/nginx/default.d:rw
       - /the/path/to/nginx/conf.d:/etc/nginx/conf.d:rw
       - /the/path/to/nginx.conf:/etc/nginx/nginx.conf:rw
       - /the/path/to/app:/var/www/app:rw
@@ -38,11 +38,10 @@ services:
         aliases:
           - mariadb.production
     environment:
-      MYSQL_ROOT_PASSWORD: ROOT_PASSWORD
-      MYSQL_USER: APP_NAME
-      MYSQL_PASSWORD: STRONG_PASSWORD
+      MYSQL_ROOT_PASSWORD: STRONG_PASSWORD_FOR_ROOT
+      MYSQL_USER: NEW_USER
+      MYSQL_PASSWORD: STRONG_PASSWORD_FOR_NEW_USER
     volumes:
-      - /etc/localtime:/etc/localtime:ro
       - /var/log/mysql:/var/log/mysql:rw
       - /the/path/to/mariadb/conf.d:/etc/mysql/mariadb.conf.d:rw
       - mariadb:/var/lib/mysql
@@ -66,7 +65,7 @@ networks:
       name: production
 ```
 
-## `nginx.conf`
+The simple nginx configuration without ssl support can be:
 
 ```nginx
 server {
@@ -75,7 +74,7 @@ server {
     server_name  localhost;
 
     location / {
-        root   /var/www/app/app/public;
+        root   /var/www/app/public;
         index index.php index.html index.htm;
         try_files $uri $uri/ /index.php?$query_string;
     }
@@ -85,7 +84,7 @@ server {
     }
 
     location ~ \.php$ {
-        root           /var/www/app/app/public;
+        root           /var/www/app/public;
         fastcgi_pass   app.production:9000;
         fastcgi_index  index.php;
         fastcgi_param  SCRIPT_FILENAME $document_root$fastcgi_script_name;
